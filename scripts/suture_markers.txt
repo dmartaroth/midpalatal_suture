@@ -1,0 +1,37 @@
+>Osteoblasts
+expressed: Bglap, Sp7, Phex, Col1a1, Col1a2, Sparc, Spp1, Ibsp, Postn
+subtype of: Osteogenic cells
+
+>Osteogenic cells
+expressed: Col1a1, Runx2
+
+>Preosteoblasts
+expressed: Bglap, Runx2
+not expressed: Phex, Dmp1
+subtype of: Osteogenic cells
+
+>Chondrocytes
+expressed: Col2a1, Acan, Matn4
+not expressed: Sp7, Phex
+
+>Osteoclasts
+expressed: Cd44, Acp5, Ocstamp
+
+>Osteocytes
+expressed: Dmp1, Fgf23, Dkk1, Notum
+not expressed: Runx2, Sparc
+subtype of: Osteogenic cells
+
+>Endothelial cells 
+expressed: Emcn, Flt1, Pecam1, Ecscr
+
+>Erythrocytes
+expressed: Hbb-bt, Hba-a2, Hba-a1
+
+>Fibroblasts
+expressed: Fn1, Vcan
+not expressed: Sp7, Runx2, Dmp1
+
+>Osteochondroprogenitors
+expressed: Gli1, Axin2, Prrx1, Bmpr1a
+subtype of: Osteogenic cells

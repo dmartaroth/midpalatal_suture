@@ -1,0 +1,23 @@
+# R environment files
+.RData
+.Rhistory
+
+# R package management files
+renv/
+packrat/
+
+# Generated files
+*.log
+*.pdf
+*.html
+
+# Temporary files
+*.tmp
+
+# User-specific files
+.Rproj.user/
+
+**/raw-data/
+**/RDS objects/
+**/*giotto-objects*/
+**/*giotto-object*/
