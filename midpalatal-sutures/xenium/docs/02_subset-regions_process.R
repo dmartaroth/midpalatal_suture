@@ -4,24 +4,30 @@
 
 # Run this code after script 01 to subset regions into individual sections
 # Updated by Daniela M. Roth on
-# Date: Fri Feb 23 12:53:15 2024 ------------------
+# Date: Mon Feb 26 14:48:07 2024 ------------------
 
 
-# Load libraries ----------------------------------------------------------
+# Load required libraries ----------------------------------------------------------
 
-# If Giotto not installed uncomment below
-# if(!"devtools" %in% installed.packages()) {
-#   install.packages("devtools")
-# }
-# 
-# devtools::install_github("drieslab/Giotto@suite")
+# List of packages to check, install if not available, and load
+packages_to_load <- c("here", "Giotto", "tidyverse", "crayon")
 
-library(here)
-library(Giotto)
-library(ggplot2)
-library(cowplot)
-library(tidyverse)
-library(readr)
+# Loop through each package
+for (package in packages_to_load) {
+  # Check if the package is installed
+  if (!requireNamespace(package, quietly = TRUE)) {
+    # If not installed, install it
+    if (package == "devtools") {
+      install.packages("devtools")
+    } else if (package == "Giotto") {
+      devtools::install_github("drieslab/Giotto@suite")
+    } else {
+      install.packages(package)
+    }
+  }
+  # Load the package
+  library(package, character.only = TRUE)
+}
 
 # Definitions and directories ---------------------------------------------
 
@@ -40,26 +46,16 @@ if(is.null(python_path)) {
 
 # Region 5 ----------------------------------------------------------------
 # Created whole-region gobject.RDS in last script
-## Set region- and section-specific paths ----------------------------
-region <- "region-5" # replace region-x with correct region name for each
 
 ## Load whole region gobject --------------------------------------------
+region <- "region-5" # replace region-x with correct region name for each
 prepro.folder <- paste0(region,"_preprocessing_","giotto-object")
 gobject <- loadGiotto(here(home.path,region,"data-output",prepro.folder))
+gobject
 
 ## Section P0a -------------------------------------------------------------
-
-# Each region has a different distribution of sections
-# Run this script with the following variables adjusted for each section
-# Decide parameters for x/y min/max from subset spatplot interactively
+# Directories
 section <- "P0a"
-x_min <- 400
-x_max <- 3100
-y_min <- 300
-y_max <- 2900
-
-
-### Create directories and instructions -------------------------------------
 dir.create(section_folder <-
              here(home.path, region, section),
            recursive = TRUE)
@@ -68,11 +64,69 @@ dir.create(results_folder <-
            recursive = TRUE)
 dir.create(output <- here(section_folder, "data-output"))
 
-# Create Giotto instructions for saving
-instrs = createGiottoInstructions(save_dir = results_folder,
-                                 save_plot = TRUE,
-                                 show_plot = FALSE,
-                                 return_plot = TRUE)
+# Function to generate plot with axis labels
+generate_plot <- function(gobject, x_min, x_max, y_min, y_max, section, region) {
+  # Subset the gobject
+  subset <- subsetGiottoLocs(
+    gobject,
+    x_min = x_min,
+    x_max = x_max,
+    y_min = y_min,
+    y_max = y_max
+  )
+  
+  # Generate ggplot2 plot with axis labels
+  p <- ggplot(data = subset@spatial_locs$cell$raw@coordinates, aes(x = sdimx, y = sdimy)) +
+    geom_point() +
+    labs(title = paste0(section, " ", region),
+         x = "X Axis Label",
+         y = "Y Axis Label") +
+    theme_minimal()
+  
+  return(p)
+}
+
+# Extract spatial data
+spatial_data <- gobject@spatial_locs$cell$raw@coordinates
+x_coordinates <- spatial_data$sdimx
+y_coordinates <- spatial_data$sdimy
+
+# Calculate initial parameters
+x_min <- min(x_coordinates)
+x_max <- max(x_coordinates)
+y_min <- min(y_coordinates)
+y_max <- max(y_coordinates)
+
+# Generate and display initial plot with axis labels
+initial_plot <- generate_plot(gobject, x_min, x_max, y_min, y_max, section, region)
+print(initial_plot)
+
+# Pause to examine the plot
+cat("Examine the plot and then press Enter to continue...")
+invisible(readline(prompt = ""))
+
+# Loop to adjust parameters and generate new plots
+while (TRUE) {
+  # Ask for new parameters
+  x_min <- as.numeric(readline(prompt = "Enter new x_min: "))
+  x_max <- as.numeric(readline(prompt = "Enter new x_max: "))
+  y_min <- as.numeric(readline(prompt = "Enter new y_min: "))
+  y_max <- as.numeric(readline(prompt = "Enter new y_max: "))
+  
+  # Generate and display new plot
+  new_plot <- generate_plot(gobject, x_min, x_max, y_min, y_max, section, region)
+  print(new_plot)
+  
+  # Ask if the user wants to continue adjusting parameters
+  continue_response <- readline(prompt = "Adjust parameters again? (yes/no): ")
+  if (tolower(continue_response) != "yes") {
+    cat("Exiting plot adjustment.\n")
+    break
+  }
+}
+
+
+### Directories -------------------------------------------------------------
 
 
 ### Subset section ----------------------------------------------------------
@@ -89,21 +143,82 @@ title <- paste0(section, " ", region)
 savename <- paste0("01_", "spatPlot2D", "_", section, "_", region)
 
 saveparam <- list(
-  base_width = 7,
-  base_height = 7,
+  base_width = 6,
+  base_height = 6,
   save_format = "pdf",
   save_name = savename,
   save_dir = results_folder,
   dpi = 300)
 
-spatPlot2D(subset,
-           spat_unit = 'cell',
-           title = title,
-           point_shape = 'no_border',
-           point_size = 0.5,
-           point_alpha = 0.4,
-           save_param = saveparam,
-           return_plot=T)
+# Define a custom ggplot2 theme function
+custom_spatplot_theme <- function() {
+  theme_minimal() +
+    theme(
+      text = element_text(size = 8),
+      plot.background = element_rect(fill = "white", color = NA),  # Remove plot border
+      axis.text = element_text(size = 6),
+      plot.title = element_text(size = 8, face = "bold"),
+      panel.grid = element_blank(),
+      axis.text.x = element_text(margin = margin(t = 5)),
+      axis.text.y = element_text(margin = margin(r = 5)),
+      axis.title = element_text(size = 8, face = "bold"),
+      axis.title.x = element_text(margin = margin(t = 0)),  # Reduce bottom margin of x-axis title
+      axis.title.y = element_text(margin = margin(r = 0)),  # Reduce right margin of y-axis title
+      plot.title.position = "plot"
+    )
+}
+
+# Initialize plot number
+plot_number <- 0
+
+# Function to extract plot function name from ggplot object
+extract_plot_function <- function(plot) {
+  plot_function_name <- deparse(substitute(plot))
+  cleaned_name <- gsub("^\\s*|\\s*$", "", plot_function_name)
+  cleaned_name <- gsub("_", "", cleaned_name)  # Remove underscores
+  return(cleaned_name)
+}
+
+
+# Function to generate filename with sequential numbering
+generate_filename <- function(plot_function_name, section, region, plot_number) {
+  plot_number_formatted <- sprintf("%02d", plot_number)
+  filename <- paste0(plot_number_formatted, "_", plot_function_name, "_", section, "_", region, ".png")
+  return(filename)
+}
+
+# Function to save plot with sequential numbering and naming
+save_plot <- function(plot, section, region, save_directory, plot_number) {
+  # Extract plot function name from object name
+  plot_function_name <- extract_plot_function(plot)
+  
+  # Increment plot number
+  plot_number <- plot_number + 1
+  
+  # Generate filename
+  filename <- generate_filename(plot_function_name, section, region, plot_number)
+  
+  # Save the plot with the constructed filename and directory specified
+  ggsave(file.path(save_directory, filename), plot, width = 6, height = 4, dpi = 300)
+  
+  # Return the incremented plot number
+  return(plot_number)
+}
+
+# Example usage:
+# Run the plot function and store the plot in 'spatPlot'
+spatPlot <- spatPlot2D(
+  subset,
+  spat_unit = 'cell',
+  title = title,
+  point_shape = 'no_border',
+  point_size = 0.5,
+  point_alpha = 0.4,
+  return_plot = TRUE
+)+custom_spatplot_theme()
+
+# Increment plot number
+plot_number <- save_plot(spatPlot, section, region, results_folder, plot_number)
 
 
 
