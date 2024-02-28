@@ -3,37 +3,22 @@
 # ## ###################### ## #
 
 # Run this code after script 01 to subset regions into individual sections
+# This code currently has to be run manually one line at a time; need to make
+# corrections before whole script can just be sourced.
 # Updated by Daniela M. Roth on
 # Date: Mon Feb 26 14:48:07 2024 ------------------
 
 
 # Load required libraries ----------------------------------------------------------
-
-# List of packages to check, install if not available, and load
-packages_to_load <- c("here", "Giotto", "tidyverse", "crayon")
-
-# Loop through each package
-for (package in packages_to_load) {
-  # Check if the package is installed
-  if (!requireNamespace(package, quietly = TRUE)) {
-    # If not installed, install it
-    if (package == "devtools") {
-      install.packages("devtools")
-    } else if (package == "Giotto") {
-      devtools::install_github("drieslab/Giotto@suite")
-    } else {
-      install.packages(package)
-    }
-  }
-  # Load the package
-  library(package, character.only = TRUE)
-}
+source("midpalatal-sutures/xenium/docs/packages.R")
+source("midpalatal-sutures/xenium/docs/themes.R")
+source("midpalatal-sutures/xenium/docs/functions.R")
 
 # Definitions and directories ---------------------------------------------
 
-# Set paths for overall Xenium data
-here() # check where top level is located
-home.path <- here("midpalatal-sutures", "xenium")
+# # Set paths for overall Xenium data
+# here() # check where top level is located
+# home.path <- here("midpalatal-sutures", "xenium")
 
 
 # Set up Giotto environment -----------------------------------------------
@@ -47,44 +32,47 @@ if(is.null(python_path)) {
 # Region 5 ----------------------------------------------------------------
 # Created whole-region gobject.RDS in last script
 
-## Load whole region gobject --------------------------------------------
 region <- "region-5" # replace region-x with correct region name for each
+home.path <- here("midpalatal-sutures","xenium")
 prepro.folder <- paste0(region,"_preprocessing_","giotto-object")
-gobject <- loadGiotto(here(home.path,region,"data-output",prepro.folder))
-gobject
 
 ## Section P0a -------------------------------------------------------------
 # Directories
 section <- "P0a"
+
 dir.create(section_folder <-
              here(home.path, region, section),
            recursive = TRUE)
+
 dir.create(results_folder <-
              here(section_folder, "figs"),
            recursive = TRUE)
-dir.create(output <- here(section_folder, "data-output"))
 
-# Function to generate plot with axis labels
-generate_plot <- function(gobject, x_min, x_max, y_min, y_max, section, region) {
-  # Subset the gobject
-  subset <- subsetGiottoLocs(
-    gobject,
-    x_min = x_min,
-    x_max = x_max,
-    y_min = y_min,
-    y_max = y_max
-  )
-  
-  # Generate ggplot2 plot with axis labels
-  p <- ggplot(data = subset@spatial_locs$cell$raw@coordinates, aes(x = sdimx, y = sdimy)) +
-    geom_point() +
-    labs(title = paste0(section, " ", region),
-         x = "X Axis Label",
-         y = "Y Axis Label") +
-    theme_minimal()
-  
-  return(p)
-}
+dir.create(output <- here(section_folder, "data-output"))
+# # Function to generate plot with axis labels
+# generate_plot <- function(gobject, x_min, x_max, y_min, y_max, section, region) {
+#   subset <- subsetGiottoLocs(gobject, x_min = x_min, x_max = x_max, y_min = y_min, y_max = y_max)
+#   p <- ggplot(data = subset@spatial_locs$cell$raw@coordinates, aes(x = sdimx, y = sdimy)) +
+#     geom_point() +
+#     labs(title = paste0(section, " ", region), x = "X Axis Label", y = "Y Axis Label") +
+#     theme_minimal()
+#   return(p)
+# }
+
+# Load gobject
+region <- "region-5"
+# prepro.folder <- paste0(region,"_preprocessing_","giotto-object")
+gobject <- loadGiotto(here(home.path, region, "data-output", prepro.folder))
+# 
+# # Define section
+# section <- "P0a"
+
+# Create directories
+# section_folder <- here(home.path, region, section)
+# dir.create(section_folder, recursive = TRUE)
+# results_folder <- here(section_folder, "figs")
+# dir.create(results_folder, recursive = TRUE)
+# output <- here(section_folder, "data-output")
 
 # Extract spatial data
 spatial_data <- gobject@spatial_locs$cell$raw@coordinates
@@ -102,23 +90,24 @@ initial_plot <- generate_plot(gobject, x_min, x_max, y_min, y_max, section, regi
 print(initial_plot)
 
 # Pause to examine the plot
-cat("Examine the plot and then press Enter to continue...")
-invisible(readline(prompt = ""))
+# Next lines not working properly, debug
+# cat("Examine the plot and then press Enter to continue...") 
+# invisible(readline(prompt = ""))
 
 # Loop to adjust parameters and generate new plots
 while (TRUE) {
   # Ask for new parameters
-  x_min <- as.numeric(readline(prompt = "Enter new x_min: "))
-  x_max <- as.numeric(readline(prompt = "Enter new x_max: "))
-  y_min <- as.numeric(readline(prompt = "Enter new y_min: "))
-  y_max <- as.numeric(readline(prompt = "Enter new y_max: "))
+  x_min <- as.numeric(readline("Enter new x_min: "))
+  x_max <- as.numeric(readline("Enter new x_max: "))
+  y_min <- as.numeric(readline("Enter new y_min: "))
+  y_max <- as.numeric(readline("Enter new y_max: "))
   
   # Generate and display new plot
   new_plot <- generate_plot(gobject, x_min, x_max, y_min, y_max, section, region)
   print(new_plot)
   
   # Ask if the user wants to continue adjusting parameters
-  continue_response <- readline(prompt = "Adjust parameters again? (yes/no): ")
+  continue_response <- readline("Adjust parameters again? (yes/no): ")
   if (tolower(continue_response) != "yes") {
     cat("Exiting plot adjustment.\n")
     break
@@ -126,7 +115,11 @@ while (TRUE) {
 }
 
 
-### Directories -------------------------------------------------------------
+# # Record parameters here for future use:
+# x_min <- 400
+# x_max <- 3100
+# y_min <- 300
+# y_max <- 2900
 
 
 ### Subset section ----------------------------------------------------------
@@ -139,74 +132,28 @@ subset <-
     y_max = y_max
   )
 
-title <- paste0(section, " ", region)
-savename <- paste0("01_", "spatPlot2D", "_", section, "_", region)
+# 
+# # Define a custom ggplot2 theme function
+# custom_spatplot_theme <- function() {
+#   theme_minimal() +
+#     theme(
+#       text = element_text(size = 8),
+#       plot.background = element_rect(fill = "white", color = NA),  # Remove plot border
+#       axis.text = element_text(size = 6),
+#       plot.title = element_text(size = 8, face = "bold"),
+#       panel.grid = element_blank(),
+#       axis.text.x = element_text(margin = margin(t = 5)),
+#       axis.text.y = element_text(margin = margin(r = 5)),
+#       axis.title = element_text(size = 8, face = "bold"),
+#       axis.title.x = element_text(margin = margin(t = 0)),  # Reduce bottom margin of x-axis title
+#       axis.title.y = element_text(margin = margin(r = 0)),  # Reduce right margin of y-axis title
+#       plot.title.position = "plot"
+#     )
+# }
 
-saveparam <- list(
-  base_width = 6,
-  base_height = 6,
-  save_format = "pdf",
-  save_name = savename,
-  save_dir = results_folder,
-  dpi = 300)
-
-# Define a custom ggplot2 theme function
-custom_spatplot_theme <- function() {
-  theme_minimal() +
-    theme(
-      text = element_text(size = 8),
-      plot.background = element_rect(fill = "white", color = NA),  # Remove plot border
-      axis.text = element_text(size = 6),
-      plot.title = element_text(size = 8, face = "bold"),
-      panel.grid = element_blank(),
-      axis.text.x = element_text(margin = margin(t = 5)),
-      axis.text.y = element_text(margin = margin(r = 5)),
-      axis.title = element_text(size = 8, face = "bold"),
-      axis.title.x = element_text(margin = margin(t = 0)),  # Reduce bottom margin of x-axis title
-      axis.title.y = element_text(margin = margin(r = 0)),  # Reduce right margin of y-axis title
-      plot.title.position = "plot"
-    )
-}
-
-# Initialize plot number
-plot_number <- 0
-
-# Function to extract plot function name from ggplot object
-extract_plot_function <- function(plot) {
-  plot_function_name <- deparse(substitute(plot))
-  cleaned_name <- gsub("^\\s*|\\s*$", "", plot_function_name)
-  cleaned_name <- gsub("_", "", cleaned_name)  # Remove underscores
-  return(cleaned_name)
-}
-
-
-# Function to generate filename with sequential numbering
-generate_filename <- function(plot_function_name, section, region, plot_number) {
-  plot_number_formatted <- sprintf("%02d", plot_number)
-  filename <- paste0(plot_number_formatted, "_", plot_function_name, "_", section, "_", region, ".png")
-  return(filename)
-}
-
-# Function to save plot with sequential numbering and naming
-save_plot <- function(plot, section, region, save_directory, plot_number) {
-  # Extract plot function name from object name
-  plot_function_name <- extract_plot_function(plot)
-  
-  # Increment plot number
-  plot_number <- plot_number + 1
-  
-  # Generate filename
-  filename <- generate_filename(plot_function_name, section, region, plot_number)
-  
-  # Save the plot with the constructed filename and directory specified
-  ggsave(file.path(save_directory, filename), plot, width = 6, height = 4, dpi = 300)
-  
-  # Return the incremented plot number
-  return(plot_number)
-}
-
-# Example usage:
-# Run the plot function and store the plot in 'spatPlot'
+# Run the spatPlot2D function and store the plot in a variable
+filename <- paste0("01_", section, "_", region, "_subset-spatPlot2D.png")
+# title <- paste0(section, " ", region)
 spatPlot <- spatPlot2D(
   subset,
   spat_unit = 'cell',
@@ -214,129 +161,174 @@ spatPlot <- spatPlot2D(
   point_shape = 'no_border',
   point_size = 0.5,
   point_alpha = 0.4,
-  return_plot = TRUE
-)+custom_spatplot_theme()
+  return_plot = TRUE,
+  save_plot = FALSE)
 
-# Increment plot number
-plot_number <- save_plot(spatPlot, section, region, results_folder, plot_number)
+# Apply the custom theme to the plot
+spatPlot <- spatPlot + custom_spatplot_theme()
 
+# Now you can save the plot with the custom theme applied
+ggsave(file.path(results_folder, filename), spatPlot, width = 6, height = 4, dpi = 300)
 
+### Store subset metadata ---------------------------------------------------
 
+subset = calculateOverlapRaster(subset,
+                                spatial_info = 'cell',
+                                feat_info = 'rna')
 
-## Load features metadata --------------------------------------------------
-# Make sure cell_feature_matrix folder is unpacked
-feature_dt = data.table::fread(feat_meta_path, header = FALSE)
-colnames(feature_dt) = c('ensembl_ID', 'feat_name', 'feat_type')
+showGiottoSpatialInfo(subset)
 
-# Find the feature IDs that belong to each feature type
-feature_dt[, table(feat_type)]
-feat_types = names(feature_dt[, table(feat_type)])
-feat_types_IDs = lapply(feat_types, function(type)
-  feature_dt[feat_type == type, unique(feat_name)])
-names(feat_types_IDs) = feat_types
+gobject <- subset
+gobject <- overlapToMatrix(gobject,
+                           poly_info = 'cell',
+                           feat_info = 'rna',
+                           name = 'raw')
+showGiottoExpression(gobject)
 
+panel_meta = data.table::fread(paste0(home.path,"/xenium_panel.tsv"))
 
-## Load transcript-level data ----------------------------------------------
-tx_dt = data.table::fread(tx_path)
-data.table::setnames(
-  x = tx_dt,
-  old = c('feature_name', 'x_location', 'y_location'),
-  new = c('feat_ID', 'x', 'y')
-)
-cat(
-  'Transcripts info available:\n ',
-  paste0('"', colnames(tx_dt), '"'),
-  '\n',
-  'with',
-  tx_dt[, .N],
-  'unfiltered detections\n'
-)
-
-# Filter by qv (Phred score)
-tx_dt_filtered = tx_dt[qv >= 20]
-cat('and', tx_dt_filtered[, .N], 'filtered detections\n\n')
-
-# Separate detections by feature type
-tx_dt_types = lapply(feat_types_IDs, function(types)
-  tx_dt_filtered[feat_ID %in% types])
-
-invisible(lapply(seq_along(tx_dt_types), function(x) {
-  cat(names(tx_dt_types)[[x]], 'detections: ', tx_dt_types[[x]][, .N], '\n')
-}))
+# Append metadata
+gobject <- addFeatMetadata(gobject = gobject,
+                           feat_type = 'rna',
+                           spat_unit = 'cell',
+                           new_metadata = panel_meta,
+                           by_column = TRUE,
+                           column_feat_ID = 'feat_ID')
 
 
-## Preview region ----------------------------------------------------------
-gpoints_list = lapply(tx_dt_types, function(x)
-  createGiottoPoints(x = x))
+### Filter data and add stats -----------------------------------------------
+gobject = filterGiotto(gobject = gobject,
+                       spat_unit = 'cell',
+                       poly_info = 'cell',
+                       expression_threshold = 1,
+                       feat_det_in_min_cells = 3,
+                       min_det_feats_per_cell = 5)
 
-# Preview QC probe detections
-plot(gpoints_list$`Blank Codeword`,
-     point_size = 1,
-     main = 'Blank Codeword')
-plot(gpoints_list$`Negative Control Codeword`,
-     point_size = 1,
-     main = 'Negative Control Codeword')
-plot(gpoints_list$`Negative Control Probe`,
-     point_size = 1,
-     main = 'Negative Control Probe')
+gobject = addStatistics(gobject, expression_values = 'raw')
 
-# Preview selected genes
-mygenes <- c("Krt14","Col1a1","Tnn","Lum")
-
-filename <-
-  paste0(
-    results_folder,
-    "/01_preview-region_",
-    str_c(mygenes, "_", collapse = ""),
-    region,
-    ".pdf"
-  )
-pdf(file =filename, width=4, height=4)
-preview.spatplot <- plot(gpoints_list$`Gene Expression`,
-     feats = mygenes)+theme(legend.position = "bottom")
-dev.off()
-
-tx_dt_types$`Gene Expression`[feat_ID %in% mygenes, table(feat_ID)]
+showGiottoCellMetadata(gobject)
+showGiottoFeatMetadata(gobject)
 
 
-## Load polygon data -------------------------------------------------------
-cellPoly_dt = data.table::fread(cell_bound_path)
-nucPoly_dt = data.table::fread(nuc_bound_path)
-
-data.table::setnames(
-  cellPoly_dt,
-  old = c('cell_id', 'vertex_x', 'vertex_y'),
-  new = c('poly_ID', 'x', 'y')
-)
-data.table::setnames(
-  nucPoly_dt,
-  old = c('cell_id', 'vertex_x', 'vertex_y'),
-  new = c('poly_ID', 'x', 'y')
-)
-
-gpoly_cells = createGiottoPolygonsFromDfr(segmdfr = cellPoly_dt,
-                                          name = 'cell',
-                                          calc_centroids = TRUE)
-gpoly_nucs = createGiottoPolygonsFromDfr(segmdfr = nucPoly_dt,
-                                         name = 'nucleus',
-                                         calc_centroids = TRUE)
+### Normalize ---------------------------------------------------------------
+gobject = normalizeGiotto(gobject = gobject,
+                          spat_unit = 'cell',
+                          scalefactor = 5000,
+                          verbose = T)
 
 
-## Create Giotto Object for entire slide -----------------------------------
-gobject = createGiottoObjectSubcellular(
-  gpoints = list(
-    rna = gpoints_list$`Gene Expression`,
-    blank_code = gpoints_list$`Blank Codeword`,
-    neg_code = gpoints_list$`Negative Control Codeword`,
-    neg_probe = gpoints_list$`Negative Control Probe`
-  ),
-  gpolygons = list(cell = gpoly_cells,
-                   nucleus = gpoly_nucs),
-  instructions = instrs
-)
+### Calculate Highly Variable Features --------------------------------------
+gobject <- calculateHVF(gobject = gobject,
+                        spat_unit = 'cell',
+                        save_param = list(save_name = paste0("02_", section, "_", region, "_HVF"),
+                                          save_dir = results_folder),
+                        return_plot = TRUE)
 
-saveGiotto(gobject,dir = here(home.path, region),foldername = paste0(region,"_preprocessing_","giotto-object"), overwrite = TRUE)
-# File will save as gobject.RDS so descriptive folder naming is essential
+
+cat(fDataDT(gobject)[, sum(hvf == 'yes')], 'hvf found')
+
+
+### Dimensional reduction ---------------------------------------------------
+
+# # Define a custom ggplot2 scatterplot function
+# my_colors <- c("#FFB6C1", "#ADD8E6", "#FFD700", "#98FB98", "#FFA07A")
+# custom_scatter_theme <- function() {
+#   theme_minimal() +
+#     theme(
+#       text = element_text(size = 8),
+#       plot.background = element_rect(fill = "white", color = NA),  # Remove plot border
+#       axis.text = element_text(size = 8),  # Increase size of axis text
+#       axis.line = element_line(color = "black"),  # Set color of axis lines to black
+#       plot.title = element_text(size = 8, face = "bold", hjust = 0.5),  # Center the plot title
+#       panel.grid = element_blank(),
+#       axis.text.x = element_text(margin = margin(t = 5)),
+#       axis.text.y = element_text(margin = margin(r = 5)),
+#       axis.title = element_text(size = 8, face = "bold"),
+#       axis.title.x = element_text(margin = margin(t = 0)),  # Reduce bottom margin of x-axis title
+#       axis.title.y = element_text(margin = margin(r = 0)),  # Reduce right margin of y-axis title
+#       plot.title.position = "plot",
+#       plot.caption = element_blank(),  # Remove plot caption
+#       legend.position = "none",  # Remove legend
+#       legend.title = element_blank()  # Remove legend title
+#     ) 
+# }
+
+
+#### PCA ---------------------------------------------------------------------
+
+gobject = runPCA(gobject = gobject,
+                     spat_unit = 'cell',
+                     expression_values = 'scaled',
+                     feats_to_use = NULL,
+                     scale_unit = F,
+                     center = F)
+
+
+# Visualize Screeplot and PCA
+# Create the plot
+p1 <- screePlot(gobject,
+                ncp = 20,
+                save_plot = TRUE,
+                save_param = list(save_name = paste0("03a_", section, "_", region, "_screePlot"),
+                                  save_dir = results_folder),
+                return_plot = TRUE)
+
+showGiottoDimRed(gobject)
+
+p2 <- plotPCA(gobject,
+              spat_unit = 'cell',
+              dim_reduction_name = 'pca',
+              dim1_to_use = 1,
+              dim2_to_use = 2, 
+              save_param = list(save_name = paste0("03b_", section, "_", region, "_PCA"),
+                                                 save_dir = results_folder),
+              return_plot = T,
+              save_plot = T)
+
+
+# library(cowplot)
+screeplot_pca <- plot_grid(p1,p2,ncol = 1)
+
+filename <- paste0("03_", section, "_", region, "_combined_screePlot_plotPCA.png")
+ggsave(file.path(results_folder, filename), screeplot_pca, width = 4, height = 8, dpi = 300)
+
+
+#### tSNE and UMAP -----------------------------------------------------------
+gobject = runtSNE(gobject,
+                      dimensions_to_use = 1:10,
+                      spat_unit = 'cell',check_duplicates=FALSE)
+
+gobject = runUMAP(gobject,
+                      dimensions_to_use = 1:10,
+                      spat_unit = 'cell')
+
+p1 <- plotTSNE(gobject,
+               point_size = 0.005,
+               save_param = list(
+                 save_name = paste0("04a_", section, "_", region, "_tSNE"),
+                                 save_dir = results_folder),return_plot=T)
+
+p2 <- plotUMAP(gobject,
+               point_size = 0.005,
+               save_param = list(
+                 save_name = paste0("04b_", section, "_", region, "_UMAP"),
+                 save_dir = results_folder),return_plot=T)
+
+tSNE_UMAP <- plot_grid(p1,p2,ncol = 2)
+filename <- paste0("04_", section, "_", region, "_combined_tSNE_UMAP.png")
+ggsave(file.path(results_folder, filename), tSNE_UMAP, width = 5, height = 3, dpi = 300)
+
+
+
+log_step("Normalization")
+
+
+
+
+
+
+
+
 
 
 # Region 6 ----------------------------------------------------------------
