@@ -3,7 +3,8 @@
 # ## ######################################## ## #
 
 # List of packages to check, install if not available, and load
-packages_to_load <- c("here", "Giotto", "tidyverse", "crayon", "utils", "cowplot")
+packages_to_load <- c("here", "Giotto", "tidyverse", "crayon", "utils", 
+                      "cowplot","ggplot2","readr","shiny")
 
 # Loop through each package
 for (package in packages_to_load) {

@@ -6,6 +6,8 @@
 
 ▷ Rework scripts generating draft figures for reproducibility
 
+▷ Convert repetitive tasks in script 01 to functions
+
 ▷ Analyze top50 genes from patterns 1 and 2 as discussed with Sergey
 
 ▷ Choose top 9 genes for hi-plex assay
