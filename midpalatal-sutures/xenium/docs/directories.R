@@ -6,7 +6,7 @@ dir.create(here(home.path, region))
 dir.create(results_folder <- here(home.path,region,"figs"))
 dir.create(xenium_folder <-
              here(home.path, region, "raw-data")) # place raw data here
-dir.create(output <- here(home.path, region, "data-output")) 
+dir.create(output <- here(home.path, region, "data-output"))
 
 
 if (length(list.files(xenium_folder)) == 0) {

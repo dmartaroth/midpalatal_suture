@@ -1,0 +1,12 @@
+feat_ID,clus,e15c expression,signaling category,interacts with:,comments,references
+Pax9,2,Picture,Wnt signaling,Wnt10a             Msx1                  Bmp4,"Based on references, would like to see collagen VI (IF?)",https://pubmed.ncbi.nlm.nih.gov/21924961/      https://pubmed.ncbi.nlm.nih.gov/25715693/
+Alx4,5,Picture,Hh signaling,Lef1                    Six2                     Alx1                     Shh                Pax9                  Gli3                         ,Guiding force for osteogenic extension/rate of differentiation?         Pathogenic variants often assoc with palate differences,https://pubmed.ncbi.nlm.nih.gov/15198690/            https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10318892/
+Chodl,5,Picture,electrophysiology,,lectin expressed in muscle cells,https://www.sciencedirect.com/science/article/pii/S0378111903004256
+Col12a1,5,Picture,ECM,Col1a1,It would be good to see Col6a1 as well - IF?,https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10017729/
+Dcn,5,"A diagram of red dots
+
+Description automatically generated",ECM,Eln          Fn1           Igf1                Bgn      Tgfb1,Role in palate cell fate (alongside Lum).                 Known to be involved in cranial vault growth/formation (with Bgn).,https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7531623/     https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6262265/        https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1876704/
+Gsc,5,Picture,Wnt/PCP inhibitor,Dvl2      Prickle1        Wnt11,,https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5318956/
+Sox9,5,Picture,Hh signaling,Sox5        Sox6     Runx2,chondrogenesis; induced with shear flow,https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4694119/
+Thbs1,5,Picture,"metabolism, ECM",Mmp9    Fn1       Cd36,thrombospondins,https://www.sciencedirect.com/science/article/pii/S0945053X14000407
+Tnn,5,Picture,integrin binding,Itgav,mechanotransduction link? Loss impacts periodontal remodeling,https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7862723/

@@ -43,3 +43,14 @@ custom_scatter_theme <- function() {
       legend.title = element_blank()  # Remove legend title
     ) 
 }
+
+
+
+feat_colors <- c("firebrick1", "darkorchid4", "greenyellow","dodgerblue", "aquamarine", 
+                 "magenta", "lawngreen", "palevioletred2", "gold", "cadetblue3", 
+                 "lightcyan", "violetred1", "lawngreen", "darkorchid4",
+                 "firebrick1", "blue", "orchid4", "salmon1", "seagreen3",
+                 "steelblue4", "royalblue2", "pink4", "cadetblue3", "red2",
+                 "chocolate1", "dodgerblue4", "darkolivegreen4", "magenta2",
+                 "skyblue2", "seagreen", "palevioletred2", "mediumpurple3",
+                 "aquamarine")
