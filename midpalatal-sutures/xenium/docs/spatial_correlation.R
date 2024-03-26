@@ -117,7 +117,11 @@ spatPlot(gobject = gobject,
          coord_fix_ratio = 1,
          save_param = list(
            save_name = paste0("03_", section, "_", region, "_Delaunay"),
-           save_dir = spatial_folder),return_plot=F)+theme(legend.position = "bottom")
+           save_dir = spatial_folder),return_plot=T)+theme(legend.position = "bottom")
+
+filename <- paste0("03_", section, "_", region, "_Delaunay.pdf")
+ggsave(file.path(here(spatial_folder, filename)), width = 6, height = 4, dpi = 300)
+
 
 
 ### Rank spatial feats ------------------------------------------------------
@@ -141,12 +145,19 @@ spat_cor_netw_DT = detectSpatialCorFeats(gobject,
 spat_cor_netw_DT = clusterSpatialCorFeats(spat_cor_netw_DT,
                                           name = 'spat_netw_clus',
                                           k=6)
+
+
+
 heatmSpatialCorFeats(gobject = gobject,
                      spatCorObject = spat_cor_netw_DT,
                      use_clus_name = 'spat_netw_clus',
+                     return_plot = T,
+                     save_plot = T,
                      save_param = list(
                        save_name = paste0("05_", section, "_", region, "_heatmSpatialCorFeats"),
-                       save_dir = spatial_folder),return_plot=F)
+                       save_dir = spatial_folder,
+                       save_format = "pdf"))
+
 
 
 netw_ranks = rankSpatialCorGroups(gobject, spatCorObject = spat_cor_netw_DT, 
@@ -172,7 +183,8 @@ spatCellPlot(gobject,
              point_size = 0.5, cow_n_col = 1,
              save_param = list(
                save_name = paste0("07_", section, "_", region, "_netwrankpatterns"),
-               save_dir = spatial_folder),return_plot=F )
+               save_dir = spatial_folder,
+               save_format = "pdf"),return_plot=F )
 
 
 spatcorfeats <- showSpatialCorFeats(spat_cor_netw_DT, 
@@ -188,7 +200,7 @@ write.csv(top_netw_spat_cluster, file = here::here(section_folder, "data-output"
 runApp("midpalatal-sutures/xenium/docs/spatplot-shinyapp.R")
 
 # Plot feats chosen for Hi-Plex ACD assay
-plotfeats <- c("Pax9","Alx4","Chodl","Col12a1","Dcn","Gsc","Sox9","Thbs1","Tnn")
+plotfeats <- c("Dkk2","Chodl","Sox9","Sox5","Dcn","Thbs1","Col12a1")
 feat_colors <- c("seagreen3","goldenrod1","dodgerblue","red2","darkorchid4","dodgerblue","white","blue","magenta","lightgrey","red3")
 
 spatInSituPlotPoints(gobject,
@@ -213,3 +225,80 @@ spatInSituPlotPoints(gobject,
                        save_name = paste0("08_", section, "_", region, "_hiplex_9_spatplot"),
                        save_dir = spatial_folder),return_plot=F)
 
+
+
+# Cell proximity network
+cell_proximities=cellProximityEnrichment(gobject = gobject,
+                                         cluster_column ="cell_types",
+                                         spatial_network_name ="Delaunay_network",
+                                         adjust_method = "fdr",
+                                         number_of_simulations = 1000)
+
+p1 <- cellProximityBarplot(gobject=gobject,
+                     CPscore=cell_proximities,
+                     min_orig_ints = 3,
+                     min_sim_ints = 3, 
+                     save_plot = FALSE,
+                     return_plot = TRUE)
+filename <- paste0("09_", section, "_", region, "_cellproximitybarplot.pdf")
+ggsave(file.path(here(spatial_folder, filename)), plot = p1,  width = 8, height = 7.5, dpi = 300)
+
+p1 <- cellProximityNetwork(gobject=gobject,
+                     CPscore = cell_proximities,
+                     remove_self_edges=F,
+                     color_depletion = "dodgerblue",
+                     self_loop_strength = 0.3,
+                     only_show_enrichment_edges=F,
+                     rescale_edge_weights=T,
+                     node_size=5,
+                     node_text_size = 3,
+                     edge_weight_range_depletion=c(1,2),
+                     edge_weight_range=c(2,5))
+filename <- paste0("10_", section, "_", region, "_cellproximitynetwork.pdf")
+ggsave(file.path(here(spatial_folder, filename)), plot = p1,  width = 8, height = 7.5, dpi = 300)
+
+
+
+spec_interaction = "mes.3--mes.4"
+gobject = addCellIntMetadata(gobject,
+                                 spatial_network = 'Delaunay_network',
+                                 cluster_column = "cell_types",
+                                 cell_interaction = spec_interaction,
+                                 name = 'mes.3_mes.4_ints')
+spatPlot(gobject,cell_color = 'mes.3_mes.4_ints',point_shape="no_border",
+         select_cell_groups = c('other_mes.3','other_mes.4','select_mes.3','select_mes.4'),
+         cell_color_code = c(select_mes.4="dodgerblue",select_mes.3="goldenrod1",other_mes.4="lightblue2",other_mes.3="cornsilk"),
+         legend_symbol_size=3, point_size=2,
+         save_param = list(
+           save_name = paste0("11_", section, "_", region, "_mes3-mes4_ints_spatplot"),
+           save_dir = spatial_folder,save_format = "pdf"),return_plot=F)
+
+spec_interaction = "mes.2--mes.4"
+gobject = addCellIntMetadata(gobject,
+                             spatial_network = 'Delaunay_network',
+                             cluster_column = "cell_types",
+                             cell_interaction = spec_interaction,
+                             name = 'mes.2_mes.4_ints')
+spatPlot(gobject,cell_color = 'mes.2_mes.4_ints',point_shape="no_border",
+         select_cell_groups = c('other_mes.2','other_mes.4','select_mes.2','select_mes.4'),
+         cell_color_code = c(select_mes.4="dodgerblue",select_mes.2="olivedrab1",other_mes.4="#F5F9FC",other_mes.2="#EFFDE0"),
+         legend_symbol_size=3, point_size=2,
+         save_param = list(
+           save_name = paste0("11_", section, "_", region, "_mes2-mes4_ints_spatplot"),
+           save_dir = spatial_folder,
+           save_format = "pdf"),return_plot=F)
+
+spec_interaction = "mes.2--mes.3"
+gobject = addCellIntMetadata(gobject,
+                             spatial_network = 'Delaunay_network',
+                             cluster_column = "cell_types",
+                             cell_interaction = spec_interaction,
+                             name = 'mes.2_mes.3_ints')
+spatPlot(gobject,cell_color = 'mes.2_mes.3_ints',point_shape="no_border",
+         select_cell_groups = c('other_mes.2','other_mes.3','select_mes.2','select_mes.3'),
+         cell_color_code = c(select_mes.3="goldenrod1",select_mes.2="olivedrab1",other_mes.3="cornsilk",other_mes.2="#EFFDE0"),
+         legend_symbol_size=3, point_size=2,
+         save_param = list(
+           save_name = paste0("11_", section, "_", region, "_mes2-mes3_ints_spatplot"),
+           save_dir = spatial_folder,
+           save_format = "pdf"),return_plot=F)

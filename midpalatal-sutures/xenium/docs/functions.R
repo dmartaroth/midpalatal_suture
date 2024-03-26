@@ -68,7 +68,8 @@ load_xenium_data <- function() {
   instrs <- createGiottoInstructions(save_dir = results_folder,
                                      save_plot = TRUE,
                                      show_plot = FALSE,
-                                     return_plot = TRUE)
+                                     return_plot = TRUE,
+                                     plot_format = 'pdf')
   
   # Check if features-blank.tsv.gz file exists
   if (!file.exists(file.path(xenium_folder, "cell_feature_matrix", "features-blank.tsv.gz"))) {
