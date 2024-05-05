@@ -1,0 +1,14 @@
+cluster,cell_type,sub_type,notes
+0,other,imm,B cells
+1,other,imm,"osteoclasts, clotting"
+2,other,imm,"neutrophils, leukocytes"
+3,other,erythr,
+4,other,imm,"T cells, immunomodulation"
+5,mes,,
+6,other,,chromatin accessibility
+7,other,erythr,
+8,other,imm,
+9,other,imm,"ROS, neutrophil aggregation"
+10,other,imm,complement
+11,other,vasc,
+12,other,imm,

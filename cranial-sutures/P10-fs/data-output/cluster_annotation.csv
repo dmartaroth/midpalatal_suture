@@ -1,0 +1,13 @@
+cluster,cell_type,sub_type,notes
+0,other,imm,B cells
+1,mes,,
+2,other,imm,
+3,other,,epidermis
+4,other,imm,"erythr, myeloid"
+5,other,imm,osteoclasts
+6,other,erythr,
+7,other,imm,neutrophils
+8,other,imm,phagocytosis
+9,other,vasc,
+10,other,imm,T cells
+11,other,imm,mast cells

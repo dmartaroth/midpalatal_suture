@@ -234,16 +234,16 @@ cell_proximities=cellProximityEnrichment(gobject = gobject,
                                          adjust_method = "fdr",
                                          number_of_simulations = 1000)
 
-p1 <- cellProximityBarplot(gobject=gobject,
+(p1 <- cellProximityBarplot(gobject=gobject,
                      CPscore=cell_proximities,
                      min_orig_ints = 3,
                      min_sim_ints = 3, 
                      save_plot = FALSE,
-                     return_plot = TRUE)
+                     return_plot = TRUE))
 filename <- paste0("09_", section, "_", region, "_cellproximitybarplot.pdf")
 ggsave(file.path(here(spatial_folder, filename)), plot = p1,  width = 8, height = 7.5, dpi = 300)
 
-p1 <- cellProximityNetwork(gobject=gobject,
+(p1 <- cellProximityNetwork(gobject=gobject,
                      CPscore = cell_proximities,
                      remove_self_edges=F,
                      color_depletion = "dodgerblue",
@@ -253,9 +253,11 @@ p1 <- cellProximityNetwork(gobject=gobject,
                      node_size=5,
                      node_text_size = 3,
                      edge_weight_range_depletion=c(1,2),
-                     edge_weight_range=c(2,5))
+                     edge_weight_range=c(2,5)))
 filename <- paste0("10_", section, "_", region, "_cellproximitynetwork.pdf")
 ggsave(file.path(here(spatial_folder, filename)), plot = p1,  width = 8, height = 7.5, dpi = 300)
+
+
 
 
 
@@ -302,3 +304,146 @@ spatPlot(gobject,cell_color = 'mes.2_mes.3_ints',point_shape="no_border",
            save_name = paste0("11_", section, "_", region, "_mes2-mes3_ints_spatplot"),
            save_dir = spatial_folder,
            save_format = "pdf"),return_plot=F)
+
+
+
+
+# Plot genes related to HIF-YAP-NICD axis of stem cell mechanoregulation
+plotfeats <- c("Igf2","Igfbp4","Dlk1")
+feat_colors <- c("red2","goldenrod1","dodgerblue","seagreen3","darkorchid4","dodgerblue","white","blue","magenta","lightgrey","red3")
+
+spatInSituPlotPoints(gobject,
+                     show_image = FALSE,
+                     feats = list(plotfeats),
+                     feats_color_code = feat_colors,
+                     point_size = 1,
+                     show_polygon = TRUE,
+                     polygon_feat_type = 'cell',
+                     show_legend = TRUE,
+                     polygon_alpha = 0.05,
+                     polygon_color = 'bisque',
+                     background_color = "white",
+                     axis_text = 8,
+                     axis_title = 9,
+                     polygon_line_size = 0.01,
+                     polygon_fill = 'cell_types',
+                     polygon_fill_as_factor = TRUE,
+                     coord_fix_ratio = TRUE,
+                     polygon_fill_code = colorcode,
+                     save_param = list(
+                       save_name = paste0("12_", section, "_", region, "_HIF-YAP-NICD_spatplot"),
+                       save_dir = spatial_folder),return_plot=F)
+
+
+# Plot genes related to EMT transition
+plotfeats <- c("Snai1","Twist1","Gsc")
+feat_colors <- c("red2","goldenrod1","dodgerblue","seagreen3","darkorchid4","dodgerblue","white","blue","magenta","lightgrey","red3")
+
+spatInSituPlotPoints(gobject,
+                     show_image = FALSE,
+                     feats = list(plotfeats),
+                     feats_color_code = feat_colors,
+                     point_size = 1,
+                     show_polygon = TRUE,
+                     polygon_feat_type = 'cell',
+                     show_legend = TRUE,
+                     polygon_alpha = 0.05,
+                     polygon_color = 'bisque',
+                     background_color = "white",
+                     axis_text = 8,
+                     axis_title = 9,
+                     polygon_line_size = 0.01,
+                     polygon_fill = 'cell_types',
+                     polygon_fill_as_factor = TRUE,
+                     coord_fix_ratio = TRUE,
+                     polygon_fill_code = colorcode,
+                     save_param = list(
+                       save_name = paste0("13_", section, "_", region, "_EMT_spatplot"),
+                       save_dir = spatial_folder),return_plot=F)
+
+
+# Plot genes related scleraxis and tendons
+plotfeats <- c("Fmod","Col11a1", "Col12a1")
+feat_colors <- c("red2","goldenrod1","dodgerblue","seagreen3","darkorchid4","dodgerblue","white","blue","magenta","lightgrey","red3")
+
+spatInSituPlotPoints(gobject,
+                     show_image = FALSE,
+                     feats = list(plotfeats),
+                     feats_color_code = feat_colors,
+                     point_size = 1,
+                     show_polygon = TRUE,
+                     polygon_feat_type = 'cell',
+                     show_legend = TRUE,
+                     polygon_alpha = 0.05,
+                     polygon_color = 'bisque',
+                     background_color = "white",
+                     axis_text = 8,
+                     axis_title = 9,
+                     polygon_line_size = 0.01,
+                     polygon_fill = 'cell_types',
+                     polygon_fill_as_factor = TRUE,
+                     coord_fix_ratio = TRUE,
+                     polygon_fill_code = colorcode,
+                     save_param = list(
+                       save_name = paste0("14_", section, "_", region, "_Scx-related_spatplot"),
+                       save_dir = spatial_folder),return_plot=F)
+
+
+
+# Interaction changed genes (ICG) -----------------------------------------
+
+write.csv(cell_proximities$enrichm_res,file = here::here(spatial_folder,"cell_proximities.csv"))
+
+library(future)
+feat_metadata = fDataDT(gobject)
+
+high_expressed_feats = feat_metadata[mean_expr_det>quantile(feat_metadata$mean_expr_det)[4]]$feat_ID
+
+plan('multisession', workers = 6)
+ICFscoresHighFeats = findInteractionChangedFeats(gobject,
+                                                  selected_feats = high_expressed_feats,
+                                                  spatial_network_name = "Delaunay_network",
+                                                  cluster_column = "cell_types",
+                                                  diff_test = "permutation",
+                                                  adjust_method = "fdr",
+                                                  nr_permutations = 2000,
+                                                  do_parallel = T)
+
+plotCellProximityFeats(gobject, icfObject = ICFscoresHighFeats,method = "dotplot")
+
+ICFscoresHighFeats = 
+  findInteractionChangedFeats(gobject = gobject, 
+                              selected_feats =high_expressed_feats$feat_ID,
+                              spatial_network_name = 'Delaunay_network',
+                              cluster_column = 'cell_types',
+                              adjust_method = 'fdr',
+                              nr_permutations = 2000,
+                              do_parallel = TRUE)
+
+
+ICGscoresHighGenes = findInteractionChangedFeats(gobject,
+                                                 selected_feats = high_expressed_genes,
+                                                 spatial_network_name = "Delaunay_network",
+                                                 cluster_column = "cell_types",
+                                                 diff_test = "permutation",
+                                                 adjust_method = "fdr",
+                                                 nr_permutations = 2000,
+                                                 do_parallel = TRUE)
+                                              
+
+
+feat_metadata=fDataDT(gobject)
+
+quantile(feat_metadata$mean_expr_det)
+
+high_expressed_feats = feat_metadata[mean_expr_det>quantile(feat_metadata$mean_expr_det)[4]]
+
+
+ICFscoresHighFeats = 
+  findInteractionChangedFeats(gobject = gobject, 
+                              selected_feats =high_expressed_feats,
+                              spatial_network_name = 'Delaunay_network',
+                              cluster_column = 'cell_types',
+                              adjust_method = 'fdr',
+                              nr_permutations = 2000,
+                              do_parallel = TRUE)
