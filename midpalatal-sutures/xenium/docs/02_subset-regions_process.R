@@ -597,6 +597,303 @@ ggsave(file.path(results_folder, filename), tSNE_UMAP, width = 5, height = 3, dp
 
 log_step("Normalization")
 
+## Section e15a -------------------------------------------------------------
+# Directories
+section <- "e15a"
+
+dir.create(section_folder <-
+             here(home.path, region, section),
+           recursive = TRUE)
+
+dir.create(results_folder <-
+             here(section_folder, "figs"),
+           recursive = TRUE)
+
+dir.create(output <- here(section_folder, "data-output"))
+
+
+# Load gobject
+region <- "region-5"
+# prepro.folder <- paste0(region,"_preprocessing_","giotto-object")
+gobject <- loadGiotto(here(home.path, region, "data-output", prepro.folder))
+
+# Extract spatial data
+spatial_data <- gobject@spatial_locs$cell$raw@coordinates
+x_coordinates <- spatial_data$sdimx
+y_coordinates <- spatial_data$sdimy
+
+# Calculate initial parameters
+x_min <- min(x_coordinates)
+x_max <- max(x_coordinates)
+y_min <- min(y_coordinates)
+y_max <- max(y_coordinates)
+
+# Generate and display initial plot with axis labels
+initial_plot <- generate_plot(gobject, x_min, x_max, y_min, y_max, section, region)
+print(initial_plot)
+
+# Pause to examine the plot
+# Next lines not working properly, debug
+# cat("Examine the plot and then press Enter to continue...") 
+# invisible(readline(prompt = ""))
+
+# Loop to adjust parameters and generate new plots
+while (TRUE) {
+  # Ask for new parameters
+  x_min <- as.numeric(readline("Enter new x_min: "))
+  x_max <- as.numeric(readline("Enter new x_max: "))
+  y_min <- as.numeric(readline("Enter new y_min: "))
+  y_max <- as.numeric(readline("Enter new y_max: "))
+  
+  # Generate and display new plot
+  new_plot <- generate_plot(gobject, x_min, x_max, y_min, y_max, section, region)
+  print(new_plot)
+  
+  # Ask if the user wants to continue adjusting parameters
+  continue_response <- readline("Adjust parameters again? (yes/no): ")
+  if (tolower(continue_response) != "yes") {
+    cat("Exiting plot adjustment.\n")
+    break
+  }
+}
+
+
+# # Record parameters here for future use:
+# x_min <- 9500
+# x_max <- 11000
+# y_min <- 500
+# y_max <- 2000
+
+
+### Subset section ----------------------------------------------------------
+subset <-
+  subsetGiottoLocs(
+    gobject,
+    x_min = x_min,
+    x_max = x_max,
+    y_min = y_min,
+    y_max = y_max
+  )
+
+
+# Run the spatPlot2D function and store the plot in a variable
+filename <- paste0("01_", section, "_", region, "_subset-spatPlot2D.pdf")
+
+spatPlot <- spatPlot2D(
+  subset,
+  spat_unit = 'cell',
+  title = title,
+  point_shape = 'no_border',
+  point_size = 0.5,
+  point_alpha = 0.4,
+  return_plot = TRUE,
+  save_plot = FALSE)
+
+# Apply the custom theme to the plot
+spatPlot <- spatPlot + custom_spatplot_theme()
+
+
+# Now you can save the plot with the custom theme applied
+# Save not working
+# ggsave(file.path(results_folder,filename), spatPlot, width = 6, height = 4, dpi = 300)
+
+### Store subset metadata ---------------------------------------------------
+
+subset = calculateOverlapRaster(subset,
+                                spatial_info = 'cell',
+                                feat_info = 'rna')
+
+showGiottoSpatialInfo(subset)
+
+gobject <- subset
+gobject <- overlapToMatrix(gobject,
+                           poly_info = 'cell',
+                           feat_info = 'rna',
+                           name = 'raw')
+showGiottoExpression(gobject)
+
+panel_meta = data.table::fread(paste0(home.path,"/xenium_panel.tsv"))
+
+# Append metadata
+gobject <- addFeatMetadata(gobject = gobject,
+                           feat_type = 'rna',
+                           spat_unit = 'cell',
+                           new_metadata = panel_meta,
+                           by_column = TRUE,
+                           column_feat_ID = 'feat_ID')
+
+
+### Filter data and add stats -----------------------------------------------
+gobject = filterGiotto(gobject = gobject,
+                       spat_unit = 'cell',
+                       poly_info = 'cell',
+                       expression_threshold = 1,
+                       feat_det_in_min_cells = 3,
+                       min_det_feats_per_cell = 5)
+
+gobject = addStatistics(gobject, expression_values = 'raw')
+
+showGiottoCellMetadata(gobject)
+showGiottoFeatMetadata(gobject)
+
+
+### Normalize ---------------------------------------------------------------
+gobject = normalizeGiotto(gobject = gobject,
+                          spat_unit = 'cell',
+                          scalefactor = 5000,
+                          verbose = T)
+
+
+### Calculate Highly Variable Features --------------------------------------
+gobject <- calculateHVF(gobject = gobject,
+                        spat_unit = 'cell',
+                        save_param = list(save_name = paste0("02_", section, "_", region, "_HVF"),
+                                          save_dir = results_folder),
+                        return_plot = TRUE)
+
+
+cat(fDataDT(gobject)[, sum(hvf == 'yes')], 'hvf found')
+
+
+### Dimensional reduction ---------------------------------------------------
+
+# # Define a custom ggplot2 scatterplot function
+# my_colors <- c("#FFB6C1", "#ADD8E6", "#FFD700", "#98FB98", "#FFA07A")
+# custom_scatter_theme <- function() {
+#   theme_minimal() +
+#     theme(
+#       text = element_text(size = 8),
+#       plot.background = element_rect(fill = "white", color = NA),  # Remove plot border
+#       axis.text = element_text(size = 8),  # Increase size of axis text
+#       axis.line = element_line(color = "black"),  # Set color of axis lines to black
+#       plot.title = element_text(size = 8, face = "bold", hjust = 0.5),  # Center the plot title
+#       panel.grid = element_blank(),
+#       axis.text.x = element_text(margin = margin(t = 5)),
+#       axis.text.y = element_text(margin = margin(r = 5)),
+#       axis.title = element_text(size = 8, face = "bold"),
+#       axis.title.x = element_text(margin = margin(t = 0)),  # Reduce bottom margin of x-axis title
+#       axis.title.y = element_text(margin = margin(r = 0)),  # Reduce right margin of y-axis title
+#       plot.title.position = "plot",
+#       plot.caption = element_blank(),  # Remove plot caption
+#       legend.position = "none",  # Remove legend
+#       legend.title = element_blank()  # Remove legend title
+#     ) 
+# }
+
+
+#### PCA ---------------------------------------------------------------------
+
+gobject = runPCA(gobject = gobject,
+                 spat_unit = 'cell',
+                 expression_values = 'scaled',
+                 feats_to_use = NULL,
+                 scale_unit = F,
+                 center = F)
+
+
+# Visualize Screeplot and PCA
+# Create the plot
+p1 <- screePlot(gobject,
+                ncp = 20,
+                save_plot = TRUE,
+                save_param = list(save_name = paste0("03a_", section, "_", region, "_screePlot"),
+                                  save_dir = results_folder),
+                return_plot = TRUE)
+
+showGiottoDimRed(gobject)
+
+p2 <- plotPCA(gobject,
+              spat_unit = 'cell',
+              dim_reduction_name = 'pca',
+              dim1_to_use = 1,
+              dim2_to_use = 2, 
+              save_param = list(save_name = paste0("03b_", section, "_", region, "_PCA"),
+                                save_dir = results_folder),
+              return_plot = T,
+              save_plot = T)
+
+
+# library(cowplot)
+screeplot_pca <- plot_grid(p1,p2,ncol = 1)
+
+filename <- paste0("03_", section, "_", region, "_combined_screePlot_plotPCA.png")
+ggsave(file.path(results_folder, filename), screeplot_pca, width = 4, height = 8, dpi = 300)
+
+
+#### tSNE and UMAP -----------------------------------------------------------
+gobject = runtSNE(gobject,
+                  dimensions_to_use = 1:10,
+                  spat_unit = 'cell',check_duplicates=FALSE)
+
+gobject = runUMAP(gobject,
+                  dimensions_to_use = 1:10,
+                  spat_unit = 'cell')
+
+p1 <- plotTSNE(gobject,
+               point_size = 0.005,
+               save_param = list(
+                 save_name = paste0("04a_", section, "_", region, "_tSNE"),
+                 save_dir = results_folder),return_plot=T)
+
+p2 <- plotUMAP(gobject,
+               point_size = 0.005,
+               save_param = list(
+                 save_name = paste0("04b_", section, "_", region, "_UMAP"),
+                 save_dir = results_folder),return_plot=T)
+
+tSNE_UMAP <- plot_grid(p1,p2,ncol = 2)
+filename <- paste0("04_", section, "_", region, "_combined_tSNE_UMAP.png")
+ggsave(file.path(results_folder, filename), tSNE_UMAP, width = 5, height = 3, dpi = 300)
+
+
+
+### sNN and Leiden clustering -----------------------------------------------
+
+gobject = createNearestNetwork(gobject,
+                               dimensions_to_use = 1:10,
+                               k = 10,
+                               spat_unit = 'cell')
+gobject = doLeidenCluster(gobject,
+                          resolution = 0.2,
+                          n_iterations = 100,
+                          spat_unit = 'cell')
+
+my_colors <- c("darkolivegreen2","dodgerblue3","red2","goldenrod1","orange","mediumpurple2","pink","dodgerblue","mediumorchid","mediumpurple","mintcream","blue3")
+
+colorcode = my_colors
+
+p1 <- plotUMAP(gobject = gobject,
+               spat_unit = 'cell',
+               cell_color = 'leiden_clus',
+               cell_color_code=my_colors,
+               show_legend = TRUE,
+               point_size = 0.01,
+               point_shape = 'no_border',
+               save_param = list(
+                 save_name = paste0("05a_", section, "_", region, "_UMAP"),
+                 save_dir = results_folder),return_plot=T)
+
+p2 <- spatPlot2D(gobject = gobject,
+                 spat_unit = 'cell',
+                 cell_color = 'leiden_clus',
+                 cell_color_code = my_colors,
+                 point_size = 0.005,
+                 point_shape = 'no_border',
+                 background_color = 'black',
+                 show_legend = FALSE,
+                 save_param = list(
+                   save_name = paste0("05b_", section, "_", region, "_spatplot"),
+                   save_dir = results_folder,
+                   base_width = 8,
+                   base_height = 6), return_plot = T)
+
+UMAP_spatPlot <- plot_grid(p1,p2,ncol = 2)
+filename <- paste0("05_", section, "_", region, "_combined_UMAP_spatPlot.png")
+ggsave(file.path(results_folder, filename), UMAP_spatPlot, width = 9, height = 3, dpi = 300)
+
+
+### Save file ---------------------------------------------------------------
+saveGiotto(gobject,dir = here(output),foldername = paste0(section,"_giotto_objects"),overwrite = FALSE)
 
 
 

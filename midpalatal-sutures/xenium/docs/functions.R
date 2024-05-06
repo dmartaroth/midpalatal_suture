@@ -65,11 +65,11 @@ log_step <- function(step_title) {
 
 load_xenium_data <- function() {
   # Create Giotto instructions for saving
-  instrs <- createGiottoInstructions(save_dir = results_folder,
+  assign('instrs' ,createGiottoInstructions(save_dir = results_folder,
                                      save_plot = TRUE,
                                      show_plot = FALSE,
                                      return_plot = TRUE,
-                                     plot_format = 'pdf')
+                                     plot_format = 'pdf'), envir = .GlobalEnv)
   
   # Check if features-blank.tsv.gz file exists
   if (!file.exists(file.path(xenium_folder, "cell_feature_matrix", "features-blank.tsv.gz"))) {

@@ -11,6 +11,10 @@ packrat/
 *.pdf
 *.html
 *.Rds
+*.cpg
+*.dbf
+*.shp
+*.shx
 
 # Temporary files
 *.tmp

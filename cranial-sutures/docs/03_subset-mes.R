@@ -18,6 +18,27 @@ P10.fs <- readRDS(here::here("cranial-sutures/P10-fs/data-output/annot_P10-fs.Rd
 P28.fs <- readRDS(here::here("cranial-sutures/P28-fs/data-output/annot_P28-fs.Rds"))
 
 
+colors <- c("violet","darkolivegreen2")
+(p1 <- DimPlot(E16.fs, reduction = "umap",label = FALSE,repel = TRUE,label.size = 3,label.box = TRUE,cols = colors)+
+  umap_theme())
+(p2 <- DimPlot(E18.fs, reduction = "umap",label = FALSE,repel = TRUE,label.size = 3,label.box = TRUE,cols = colors)+
+    umap_theme())
+(p3 <- DimPlot(P10.fs, reduction = "umap",label = FALSE,repel = TRUE,label.size = 3,label.box = TRUE,cols = colors)+
+    umap_theme())
+(p4 <- DimPlot(P28.fs, reduction = "umap",label = FALSE,repel = TRUE,label.size = 3,label.box = TRUE,cols = colors)+
+    umap_theme())
+
+annotated_umaps <- plot_grid(p1,p2,p3,p4,
+          ncol = 2)
+
+
+dir.create(suppl_data <-
+             here("pubfigs","supplementary"),
+           recursive = TRUE)
+filename <- paste0("S5_frontal-sutures_mes-other-annotation_UMAP.png")
+ggsave(file.path(suppl_data, filename), annotated_umaps, width = 7, height = 6, dpi = 300)
+
+
 # Subset by mes cluster identity in mes_annotation column -----------------
 
 E16.fs.mes <- subset(E16.fs, idents= "mes")

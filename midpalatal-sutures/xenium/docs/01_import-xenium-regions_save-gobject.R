@@ -22,15 +22,15 @@ dir.create(src <- here(home.path, "src"), recursive = TRUE)
 ## Create region-specific directories and set paths ----------------------------
 region <- "region-5" # replace region-x with correct region name for each
 
-source(here::here("midpalatal-sutures","xenium","docs","packages.R"))
+source(here::here("midpalatal-sutures/xenium/docs/packages.R"))
 source(here::here("midpalatal-sutures/xenium/docs/functions.R"))
 source(here::here("midpalatal-sutures/xenium/docs/directories.R"))
 
-load_xenium_data()
+xenium_data <- load_xenium_data()
+attach(xenium_data)
 
 ## Preview region ----------------------------------------------------------
-gpoints_list = lapply(tx_dt_types, function(x)
-  createGiottoPoints(x = x))
+gpoints_list = lapply(tx_dt_types, function(x)createGiottoPoints(x = x))
 
 # Preview QC probe detections
 plot(gpoints_list$`Blank Codeword`,
@@ -62,7 +62,9 @@ dev.off()
 tx_dt_types$`Gene Expression`[feat_ID %in% mygenes, table(feat_ID)]
 
 
-load_polygon_data()
+polygon_data <- load_polygon_data()
+attach(polygon_data)
+
 
 ## Create Giotto Object for entire slide -----------------------------------
 gobject = createGiottoObjectSubcellular(
