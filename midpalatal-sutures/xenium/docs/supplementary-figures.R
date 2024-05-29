@@ -23,6 +23,15 @@ if(is.null(python_path)) {
 
 # Figure 2 ----------------------------------------------------------------
 
+
+## Supplementary Figure 1 --------------------------------------------------
+ 
+# RNAscope replicates of fs/mps comparison
+
+
+## Supplementary Figure 2 --------------------------------------------------
+
+
 # Spatial expression of Fgfr1/2/3, Twist1 in other planes of sectioning at e15.5
 here()
 xenium_folder <- here::here("midpalatal-sutures/xenium")
@@ -30,10 +39,10 @@ dir.create(suppl_data <-
              here(xenium_folder, "pubfigs","supplementary"),
            recursive = TRUE)
 
-## e15a (anterior) ---------------------------------------------------------
+### e15a (anterior) ---------------------------------------------------------
 
 
-e15a <- loadGiotto(here::here(xenium_folder,"region-5/e15a/data-output/e15a_giotto_objects/gobject.RDS"))
+e15a <- loadGiotto(here::here(xenium_folder,"region-5/e15a/data-output/e15a_giotto_objects"))
 my_colors <- c("darkolivegreen2","dodgerblue3","red2","goldenrod1","orange","mediumpurple2","pink","dodgerblue","mediumorchid","mediumpurple","mintcream","blue3")
 feat_colors <- c("green3","violet","black","dodgerblue")
 
@@ -54,9 +63,35 @@ spatInSituPlotPoints(gobject = e15a,
                      polygon_fill = 'leiden_clus',
                      polygon_fill_as_factor = TRUE,
                      coord_fix_ratio = TRUE,
-                     polygon_fill_code = colorcode,
+                     polygon_fill_code = my_colors,
                      save_param = list(
                        save_name = paste0("S2_e15a_leidenclus"),
+                       save_dir = suppl_data),return_plot=T)
+
+e15b <- loadGiotto(here::here("midpalatal-sutures/xenium/region-7/e15b/data-output/e15b_giotto_objects"))
+my_colors <- c("goldenrod1","darkolivegreen2","salmon","dodgerblue2","mediumpurple2","orchid","seagreen","red2","pink","mediumpurple","darkorchid2","blue3")
+feat_colors <- c("green3","violet","black","dodgerblue")
+
+genes <-  list('rna'=c("Fgfr1","Fgfr2","Fgfr3","Twist1"))
+spatInSituPlotPoints(gobject = e15b,
+                     show_image = FALSE,
+                     feats = genes,
+                     feats_color_code = feat_colors,
+                     point_size = 1.5,show_polygon = TRUE,
+                     polygon_feat_type = 'cell',
+                     show_legend = TRUE,
+                     polygon_alpha = 0.1,
+                     polygon_color = 'pink2',
+                     background_color = "floralwhite",
+                     axis_text = 8,
+                     axis_title = 9,
+                     polygon_line_size = 0.1,
+                     polygon_fill = 'leiden_clus',
+                     polygon_fill_as_factor = TRUE,
+                     coord_fix_ratio = TRUE,
+                     polygon_fill_code = my_colors,
+                     save_param = list(
+                       save_name = paste0("S2_e15b_leidenclus"),
                        save_dir = suppl_data),return_plot=T)
 
 
@@ -87,7 +122,7 @@ spatInSituPlotPoints(gobject = e15a,
                      polygon_fill = 'leiden_clus',
                      polygon_fill_as_factor = TRUE,
                      coord_fix_ratio = TRUE,
-                     polygon_fill_code = colorcode,
+                     polygon_fill_code = my_colors,
                      save_param = list(
                        save_name = paste0("S4_e15a_leidenclus"),
                        save_dir = suppl_data),return_plot=T)
@@ -98,11 +133,48 @@ spatInSituPlotDensity(e15a,
                       polygon_alpha = 1,
                       polygon_color = "white",
                       background_color = "white",
-                      cow_n_col = 2,
+                      cow_n_col = 1,
                       save_param = list(
                         save_name = paste0("S4_e15a_Tenocyte_density"),
                         save_dir = suppl_data,save_format = "pdf"))
 
+
+## e15b (posterior) ---------------------------------------------------------
+
+my_colors <- c("darkolivegreen2","dodgerblue3","red2","goldenrod1","orange","mediumpurple2","pink","dodgerblue","mediumorchid","mediumpurple","mintcream","blue3")
+feat_colors <- c("green3","violet","black","turquoise","red")
+genes <-  list('rna'=c("Mkx","Chodl","Col3a1","Lum","Six2"))
+spatInSituPlotPoints(gobject = e15b,
+                     show_image = FALSE,
+                     feats = genes,
+                     feats_color_code = feat_colors,
+                     point_size = 1,show_polygon = TRUE,
+                     polygon_feat_type = 'cell',
+                     show_legend = TRUE,
+                     polygon_alpha = 0.1,
+                     polygon_color = 'pink2',
+                     background_color = "floralwhite",
+                     axis_text = 8,
+                     axis_title = 9,
+                     polygon_line_size = 0.1,
+                     polygon_fill = 'leiden_clus',
+                     polygon_fill_as_factor = TRUE,
+                     coord_fix_ratio = TRUE,
+                     polygon_fill_code = my_colors,
+                     save_param = list(
+                       save_name = paste0("S4_e15b_leidenclus"),
+                       save_dir = suppl_data),return_plot=T)
+
+spatInSituPlotDensity(e15b,
+                      feats = c("Lum","Six2","Mkx", "Col3a1"),
+                      feat_type = "rna",
+                      polygon_alpha = 1,
+                      polygon_color = "white",
+                      background_color = "white",
+                      cow_n_col = 1,
+                      save_param = list(
+                        save_name = paste0("S4_e15b_Tenocyte_density"),
+                        save_dir = suppl_data,save_format = "pdf"))
 
 # Figure 5 ----------------------------------------------------------------
 
