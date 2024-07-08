@@ -3,15 +3,9 @@
 # ## ######################################## ## #
 
 # Updated by: Daniela M. Roth
-# Date: Wed Mar 20 10:04:38 2024 ------------------
+# Date: Tue Jun 04 13:44:31 2024 ------------------
 
-
-# needs to be situated properly in scripts
-# this is rough analysis to expedite hi-plex experiment targets
-# manually moved giotto objects folder from script 02 to data-output folder for
-# region/section folder for now until previous script updated for correct 
-# save location
-
+# Remove unnecessary code 
 
 # Load required libraries ----------------------------------------------------------
 source("midpalatal-sutures/xenium/docs/packages.R")

@@ -239,7 +239,7 @@ spatplot_UMAP <- plot_grid(p1,p2,ncol = 2)
 filename <- paste0("08_", section, "_", region, "_combined_spatplot_UMAP.png")
 ggsave(file.path(annot_folder, filename), spatplot_UMAP, width = 9, height = 3, dpi = 300)
 
-# Create annotation file and script as in parse analysis scripts
+# Create annotation file and script
 # For now,
 # cluster - prediction - annotation - color
 # 1 - lateral mesenchyme - mes.2 - "greenyellow"
@@ -301,5 +301,5 @@ spatInSituPlotPoints(gobject,
 ### Save annotated gobject --------------------------------------------------
 saveGiotto(gobject,dir = here(output),foldername = paste0(region,"_",section,"_annotated_","giotto-object"), overwrite = TRUE)
 # File will save as gobject.RDS so descriptive folder naming is essential
-# This is for left palatal shelf - I need to do this for left, right, and whole
+
 

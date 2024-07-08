@@ -1,3 +1,7 @@
+# ## ######################################## ## #
+#     JOINT DENSITIES CRANIAL SUTURES            #
+# ## ######################################## ## #
+
 library(here)
 
 source(here::here("cranial-sutures/docs/directories.R"))
